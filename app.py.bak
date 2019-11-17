@@ -1,0 +1,27 @@
+from flask import Flask, escape, request, make_response
+import StringIO
+import csv
+
+
+import sqlite3
+
+app = Flask(__name__)
+
+
+@app.route('/data')
+def hello():
+    # name = request.args.get("name", "World")
+
+    conn = sqlite3.connect('main.db')
+    cursor = conn.cursor()
+
+    csvList = list(cursor.execute("select Dpto, count(*) from fuerza group by Dpto;"))
+
+    si = StringIO.StringIO()
+    cw = csv.writer(si)
+    cw.writerows(csvList)
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
+
